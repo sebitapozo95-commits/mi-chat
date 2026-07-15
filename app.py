@@ -7,19 +7,19 @@ import datetime
 PROJECT_ID = "mi-chat-web-96461"
 API_KEY = "AIzaSyBXJkeRy1yKwVyyipA80BmBGLmO9QTjTjY"
 
-# Ruta corregida y verificada para tu base de datos de Firebase
-FIREBASE_URL = f"https://{PROJECT_ID}://firebaseio.com"
+# Dirección URL exacta corregida con tu base de datos de la imagen
+FIREBASE_URL = "https://firebaseio.com"
 
 st.set_page_config(page_title="Chat Global", page_icon="💬", layout="centered")
 st.title("💬 Nuestro Chat en Tiempo Real")
 
 # Casilla obligatoria para el Nombre de Usuario
-nombre_usuario = st.text_input("Tu Nombre de Usuario:", value="UsuarioAnonimo")
+nombre_usuario = st.text_input("Tu Nombre de Usuario:", value="Sebastian")
 
 # 1. FUNCIÓN PARA LEER MENSAJES DESDE LA NUBE
 def obtener_mensajes():
     try:
-        respuesta = requests.get(FIREBASE_URL)
+        respuesta = requests.get(FIREBASE_URL, timeout=5)
         if respuesta.status_code == 200 and respuesta.json():
             return respuesta.json()
         return {}
@@ -35,7 +35,7 @@ def enviar_mensaje(usuario, texto):
         "hora": hora
     }
     try:
-        requests.post(FIREBASE_URL, data=json.dumps(datos))
+        requests.post(FIREBASE_URL, data=json.dumps(datos), timeout=5)
     except:
         pass
 
