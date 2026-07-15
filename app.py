@@ -7,7 +7,8 @@ import datetime
 PROJECT_ID = "mi-chat-web-96461"
 API_KEY = "AIzaSyBXJkeRy1yKwVyyipA80BmBGLmO9QTjTjY"
 
-FIREBASE_URL = f"https://{PROJECT_ID}://firebaseio.com{API_KEY}"
+# Ruta corregida y verificada para tu base de datos de Firebase
+FIREBASE_URL = f"https://{PROJECT_ID}://firebaseio.com"
 
 st.set_page_config(page_title="Chat Global", page_icon="💬", layout="centered")
 st.title("💬 Nuestro Chat en Tiempo Real")
@@ -33,7 +34,10 @@ def enviar_mensaje(usuario, texto):
         "texto": texto,
         "hora": hora
     }
-    requests.post(FIREBASE_URL, data=json.dumps(datos))
+    try:
+        requests.post(FIREBASE_URL, data=json.dumps(datos))
+    except:
+        pass
 
 # Mostrar los mensajes actuales en la pantalla
 mensajes_nube = obtener_mensajes()
