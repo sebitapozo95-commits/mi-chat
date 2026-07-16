@@ -9,9 +9,9 @@ import base64
 # --- CONFIGURACIÓN DE TU BASE DE DATOS DE TU IMAGEN ---
 PROJECT_ID = "mi-chat-web-96461"
 API_KEY = "AIzaSyBXJkeRy1yKwVyyipA80BmBGLmO9QTjTjY"
-
+FIREBASE_URL = "https://firebaseio.com"
 # Ruta universal verificada para la API de Firebase
-FIREBASE_URL = f"https://{PROJECT_ID}://firebaseio.com"
+
 
 st.set_page_config(page_title="Chat Global Completo", page_icon="💬", layout="centered")
 st.title("💬 Nuestro Chat con Texto y Fotos")
