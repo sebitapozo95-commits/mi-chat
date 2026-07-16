@@ -6,11 +6,11 @@ import datetime
 import io
 import base64
 
-# --- TUS CLAVES REALES DE FIREBASE ---
+# --- CONFIGURACIÓN DE TU BASE DE DATOS DE TU IMAGEN ---
 PROJECT_ID = "mi-chat-web-96461"
 API_KEY = "AIzaSyBXJkeRy1yKwVyyipA80BmBGLmO9QTjTjY"
 
-# Dirección URL exacta corregida con tu base de datos de Firebase
+# Ruta universal verificada para la API de Firebase
 FIREBASE_URL = f"https://{PROJECT_ID}://firebaseio.com"
 
 st.set_page_config(page_title="Chat Global Completo", page_icon="💬", layout="centered")
@@ -26,7 +26,8 @@ def obtener_mensajes():
         if respuesta.status_code == 200 and respuesta.json():
             return respuesta.json()
         return {}
-    except:
+    except Exception as e:
+        st.sidebar.error(f"Error al leer de Firebase: {e}")
         return {}
 
 # 2. FUNCIÓN PARA ENVIAR TEXTO E IMAGEN A LA NUBE
@@ -34,17 +35,15 @@ def enviar_mensaje(usuario, texto, foto_archivo):
     hora = datetime.datetime.now().strftime("%H:%M")
     imagen_base64 = ""
     
-    # Si el usuario subió una foto, la convertimos a texto para guardarla en Firebase
     if foto_archivo is not None:
         try:
             img = Image.open(foto_archivo)
-            # Redimensionar un poco la imagen para que suba rápido a internet
-            img.thumbnail((400, 400))
+            img.thumbnail((300, 300))
             buffer = io.BytesIO()
             img.save(buffer, format="JPEG")
             imagen_base64 = base64.b64encode(buffer.getvalue()).decode()
-        except:
-            pass
+        except Exception as e:
+            st.sidebar.error(f"Error procesando imagen: {e}")
 
     datos = {
         "usuario": usuario,
@@ -52,26 +51,32 @@ def enviar_mensaje(usuario, texto, foto_archivo):
         "imagen": imagen_base64,
         "hora": hora
     }
+    
     try:
-        requests.post(FIREBASE_URL, data=json.dumps(datos), timeout=5)
-    except:
-        pass
+        respuesta = requests.post(FIREBASE_URL, data=json.dumps(datos), timeout=5)
+        if respuesta.status_code == 200:
+            st.sidebar.success("¡Mensaje enviado a Firebase con éxito!")
+        else:
+            st.sidebar.error(f"Firebase rechazó el mensaje: Código {respuesta.status_code}")
+    except Exception as e:
+        st.sidebar.error(f"Error de conexión al enviar: {e}")
 
 # Mostrar los mensajes actuales en la pantalla
 mensajes_nube = obtener_mensajes()
 if mensajes_nube:
     for key, msg in mensajes_nube.items():
-        rol = "user" if msg["usuario"] == nombre_usuario else "assistant"
-        with st.chat_message(rol):
-            st.write(f"**{msg['usuario']}** [{msg['hora']}]:")
-            if msg.get("texto"):
-                st.write(msg["texto"])
-            if msg.get("imagen"):
-                try:
-                    img_data = base64.b64decode(msg["imagen"])
-                    st.image(io.BytesIO(img_data), width=250)
-                except:
-                    pass
+        if isinstance(msg, dict) and "usuario" in msg:
+            rol = "user" if msg["usuario"] == nombre_usuario else "assistant"
+            with st.chat_message(rol):
+                st.write(f"**{msg['usuario']}** [{msg['hora']}]:")
+                if msg.get("texto"):
+                    st.write(msg["texto"])
+                if msg.get("imagen"):
+                    try:
+                        img_data = base64.b64decode(msg["imagen"])
+                        st.image(io.BytesIO(img_data), width=250)
+                    except:
+                        pass
 
 # Formulario de entrada (¡Aquí vuelve a aparecer la opción de fotos!)
 with st.form("enviar_bloque", clear_on_submit=True):
