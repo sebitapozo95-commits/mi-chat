@@ -10,10 +10,40 @@ PROJECT_ID = "mi-chat-web-96461"
 API_KEY = "AIzaSyBXJkeRy1yKwVyyipA80BmBGLmO9QTjTjY"
 FIREBASE_URL = "https://firebaseio.com"
 
-st.set_page_config(page_title="Chat Global", page_icon="💬", layout="centered")
-st.title("💬 Nuestro Chat con Texto y Fotos")
+st.set_page_config(page_title="Chat Privado", page_icon="🔒", layout="centered")
 
-nombre_usuario = st.text_input("Tu Nombre de Usuario:", value="Sebastian")
+# --- CONTROL DE INICIO DE SESIÓN ---
+if "autenticado" not in st.session_state:
+    st.session_state["autenticado"] = False
+
+if not st.session_state["autenticado"]:
+    st.title("🔒 Iniciar Sesión en el Chat")
+    st.write("Por favor, ingresa tus credenciales para acceder.")
+    
+    # Formulario de login
+    usuario_input = st.text_input("Usuario:")
+    contrasena_input = st.text_input("Contraseña:", type="password")
+    boton_login = st.button("Ingresar al Chat")
+    
+    if boton_login:
+        # AQUÍ PUEDES CAMBIAR EL USUARIO Y CONTRASEÑA QUE TÚ QUIERAS
+        if (usuario_input == "sebastian" and contrasena_input == "12345") or (usuario_input == "amigo" and contrasena_input == "54321"):
+            st.session_state["autenticado"] = True
+            st.session_state["nombre_usuario"] = usuario_input
+            st.rerun()
+        else:
+            st.error("❌ Usuario o contraseña incorrectos")
+            
+    st.stop() # Detiene el código aquí si no está autenticado
+
+# --- CÓDIGO DEL CHAT DE FIREBASE (SOLO CORRE SI YA INICIÓ SESIÓN) ---
+nombre_usuario = st.session_state["nombre_usuario"]
+st.title(f"💬 Chat Privado - Bienvenido, {nombre_usuario}")
+
+# Botón para cerrar sesión si lo deseas
+if st.sidebar.button("🚪 Cerrar Sesión"):
+    st.session_state["autenticado"] = False
+    st.rerun()
 
 def obtener_mensajes():
     try:
